@@ -1,8 +1,8 @@
 #include "head.h"
-#include "handler.h"
+#include "handlers.h"
 
 #define PORT_NUMBER 8053
-#define QUEUE_NUM 10
+#define QUEUE_NUM 100
 
 void toIPv4(char* str, int* dest);
 
@@ -49,12 +49,13 @@ int main(int argc, char* argv[]) {
             if (FD_ISSET(i, &readyConnections)) {
                 if (i == sockId) {
                     // this is a new connection
-                    handleNew(i, &connectionSet);
+                    FileDesc connection = accept(i, NULL, NULL);
+                    handleNew(connection, &connectionSet);
                 } else {
                     // this is a old connection
                     ReadBuff *result = handleExisting(i, readBuffs);
                     if (result) {
-                        handleResult(i, readBuffs, &connectionSet, &qaPairs);
+                        handleResult(result, &connectionSet, &qaPairs);
                     }
                 }
             }
