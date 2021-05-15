@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     QueAnsPairs *qaPairs = newQAPairs();
 
     // open log file
-    FileDesc logFile = creat("dns_svr.log", O_WRONLY);
+    FileDesc logFile = open("./dns_svr.log", O_WRONLY|O_CREAT|O_TRUNC);
 
     // start listening and processing
     while (TRUE) {
