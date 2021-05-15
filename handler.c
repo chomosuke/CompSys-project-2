@@ -92,7 +92,7 @@ void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, f
             addQA(qaPairs, dnsConn, connection);
         } else {
             // log
-            sprintf(logBuff, "%s unimplemenetd request\n", timeStamp);
+            sprintf(logBuff, "%s unimplemented request\n", timeStamp);
             write(logFile, logBuff, strlen(logBuff));
 
             // cut off everything not in header
