@@ -1,10 +1,10 @@
-#include "dataStructures.h"
+#include "dataStructure.h"
 
 ReadBuff *newReadBuff(FileDesc connection, int length) {
     ReadBuff *this = malloc(sizeof(ReadBuff));
     this->length = length;
     this->readLength = 0;
-    this->bytes = malloc(this->length * sizeof(char));
+    this->bytes = malloc(this->length * sizeof(uint8_t));
     assert(this->bytes != NULL);
     this->connection = connection;
     return this;

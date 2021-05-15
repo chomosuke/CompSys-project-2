@@ -1,5 +1,5 @@
-#ifndef DATASTRUCTURES
-#define DATASTRUCTURES
+#ifndef DATASTRUCTURE
+#define DATASTRUCTURE
 
 #include "head.h"
 
@@ -7,7 +7,7 @@ typedef struct {
     FileDesc connection;
     int length;
     int readLength;
-    char *bytes;
+    uint8_t *bytes;
 } ReadBuff;
 ReadBuff *newReadBuff(FileDesc connection, int length);
 void buffRead(ReadBuff *this);
