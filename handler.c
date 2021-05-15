@@ -100,11 +100,14 @@ void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, f
             result->readLength = 12;
 
             // change rcode to 4
-            result->bytes[3] &= 240;
-            result->bytes[3] |= 4;
+            result->bytes[3] &= 0xf0;
+            result->bytes[3] |= 0x4;
+
+            // set ra to 1
+            result->bytes[3] |= 0x80;
 
             // change qr to respones
-            result->bytes[2] |= 128;
+            result->bytes[2] |= 0x80;
 
             // set qd and an numbers etc to 0
             int i;

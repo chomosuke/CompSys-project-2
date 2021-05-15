@@ -10,13 +10,13 @@ Info *newInfo(ReadBuff *data) {
     uint16_t queryParam;
     memcpy(&queryParam, data->bytes + 2, sizeof(queryParam));
     this->qr = queryParam >> 15 & 1;
-    this->opcode = queryParam >> 11 & 15;
+    this->opcode = queryParam >> 11 & 0xf;
     this->aa = queryParam >> 10 & 1;
     this->tc = queryParam >> 9 & 1;
     this->rd = queryParam >> 8 & 1;
     this->ra = queryParam >> 7 & 1;
     this->z = queryParam >> 4 & 7;
-    this->rcode = queryParam & 15;
+    this->rcode = queryParam & 0xf;
     memcpy(&this->qdcount, data->bytes + 4, sizeof(this->qdcount));
     this->qdcount = ntohs(this->qdcount);
     memcpy(&this->ancount, data->bytes + 6, sizeof(this->ancount));
@@ -66,7 +66,7 @@ Info *newInfo(ReadBuff *data) {
         uint16_t offset;
         memcpy(&offset, pBytes, sizeof(offset));
         offset = ntohs(offset);
-        offset = offset & 16383; // get rid of the starting 1s
+        offset = offset & 0x3fff; // get rid of the starting 1s
         uint8_t *pQStart = data->bytes + offset;
         pBytes += 2;
 
