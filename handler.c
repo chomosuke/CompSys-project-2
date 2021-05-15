@@ -30,7 +30,7 @@ ReadBuff *handleRead(FileDesc connection, ReadBuffs *readBuffs) {
 // this will parse the read data stream and do something about it.
 // if it's a query, forward to the server and add entry to qaPairs
 // if it's an answer, forward to client and remove entry to qaPairs
-void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, fd_set *connectionSet, struct sockaddr_in dnsAddr) {
+void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, fd_set *connectionSet, struct sockaddr_in dnsAddr, FileDesc logFile) {
     Info *info = newInfo(result);
     if (info->qr == 1) {
         // response
@@ -49,22 +49,45 @@ void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, f
         removeQA(qaPairs, connection);
     } else {
         // query
+        if (info->querys[0].qtype == 28) {
+            FileDesc dnsConn = socket(AF_INET, SOCK_STREAM, 0);
+            int c = connect(dnsConn, (struct sockaddr*)&dnsAddr, sizeof(dnsAddr));
+            if (c < 0) {
+                printf("%d\n", errno);
+                exit(1);
+            }
 
-        FileDesc dnsConn = socket(AF_INET, SOCK_STREAM, 0);
-        int c = connect(dnsConn, (struct sockaddr*)&dnsAddr, sizeof(dnsAddr));
-        if (c < 0) {
-            printf("%d\n", errno);
-            exit(1);
+            buffWrite(result, dnsConn);
+
+            // add to connection set
+            FD_SET(dnsConn, connectionSet);
+
+            // add to qaPairs
+            addQA(qaPairs, dnsConn, connection);
+        } else {
+            // cut off everything not in header
+            result->length = 12;
+            result->readLength = 12;
+
+            // change rcode to 4
+            result->bytes[3] &= 240;
+            result->bytes[3] |= 4;
+
+            // change qr to respones
+            result->bytes[2] |= 128;
+
+            // set qd and an numbers etc to 0
+            int i;
+            for (i = 4; i < 12; i++) {
+                result->bytes[i] = 0;
+            }
+
+            buffWrite(result, connection);
+            FD_CLR(connection, connectionSet);
+            close(connection);
         }
-
-        buffWrite(result, dnsConn);
-
-        // add to connection set
-        FD_SET(dnsConn, connectionSet);
-
-        // add to qaPairs
-        addQA(qaPairs, dnsConn, connection);
     }
+    destroyReadBuff(result);
 }
 
 void buffWrite(ReadBuff *buff, FileDesc connection) {

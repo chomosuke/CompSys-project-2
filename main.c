@@ -35,7 +35,6 @@ int main(int argc, char* argv[]) {
     assert(bind(sockId, (struct sockaddr*)&servAddr, sizeof(servAddr)) >= 0);
     assert(listen(sockId, QUEUE_NUM) >= 0);
 
-
     // init data structures
     fd_set connectionSet;
     FD_ZERO(&connectionSet); // initialize the connectionSet for select
@@ -44,6 +43,10 @@ int main(int argc, char* argv[]) {
     ReadBuffs *readBuffs = newReadBuffs();
     QueAnsPairs *qaPairs = newQAPairs();
 
+    // open log file
+    FileDesc logFile = creat("./dns_svr.log", O_WRONLY);
+
+    // start listening and processing
     while (TRUE) {
         fd_set readyConnections = connectionSet;
         select(FD_SETSIZE, &readyConnections, NULL, NULL, NULL);
@@ -58,7 +61,7 @@ int main(int argc, char* argv[]) {
                     // this is a old connection
                     ReadBuff *result = handleRead(i, readBuffs);
                     if (result) {
-                        handleResult(i, result, qaPairs, &connectionSet, dnsAddr);
+                        handleResult(i, result, qaPairs, &connectionSet, dnsAddr, logFile);
                     }
                 }
             }

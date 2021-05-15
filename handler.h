@@ -6,6 +6,6 @@
 #include "parser.h"
 
 ReadBuff *handleRead(FileDesc connection, ReadBuffs *readBuffs);
-void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, fd_set *connectionSet, struct sockaddr_in dnsAddr);
+void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, fd_set *connectionSet, struct sockaddr_in dnsAddr, FileDesc logFile);
 
 #endif

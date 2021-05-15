@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #define CACHE
 #define NONBLOCKING
