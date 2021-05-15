@@ -94,7 +94,8 @@ Info *newInfo(ReadBuff *data) {
         pBytes += 2; // 2 bytes are read
 
         this->answers[iAnswers].rdata = malloc(this->answers[iAnswers].rdlength * sizeof(uint8_t));
-        memcpy(&this->answers[iAnswers].rdata, pBytes, this->answers[iAnswers].rdlength * sizeof(uint8_t));
+        assert(this->answers[iAnswers].rdata != NULL);
+        memcpy(this->answers[iAnswers].rdata, pBytes, this->answers[iAnswers].rdlength * sizeof(uint8_t));
         pBytes += this->answers[iAnswers].rdlength;
     }
 

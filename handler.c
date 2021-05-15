@@ -1,6 +1,13 @@
 #include "handler.h"
+#include "parser.h"
+
+#define TIME_LEN 25
+
+// 2 domain name + a time stamp and " relpacing  by "
+#define MAX_LOG_LEN (TIME_LEN + DOMAIN_MAX_LEN * 2 + 15)
 
 void buffWrite(ReadBuff *buff, FileDesc connection);
+void getTimeStamp(char *buff);
 
 // return the read data if finished reading, otherwise return NULL
 ReadBuff *handleRead(FileDesc connection, ReadBuffs *readBuffs) {
@@ -32,8 +39,21 @@ ReadBuff *handleRead(FileDesc connection, ReadBuffs *readBuffs) {
 // if it's an answer, forward to client and remove entry to qaPairs
 void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, fd_set *connectionSet, struct sockaddr_in dnsAddr, FileDesc logFile) {
     Info *info = newInfo(result);
+
+    char timeStamp[TIME_LEN];
+    getTimeStamp(timeStamp);
+    char logBuff[MAX_LOG_LEN];
+
     if (info->qr == 1) {
         // response
+
+        if (info->ancount > 0 && info->answers[0].qtype == AAAA) {
+            // log
+            char addr[INET6_ADDRSTRLEN];
+            inet_ntop(AF_INET6, info->answers[0].rdata, addr, INET6_ADDRSTRLEN);
+            sprintf(logBuff, "%s %s is at %s\n", timeStamp, info->querys[0].qname, addr);
+            write(logFile, logBuff, strlen(logBuff));
+        }
 
         FileDesc ansConn = findAns(qaPairs, connection);
 
@@ -49,7 +69,13 @@ void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, f
         removeQA(qaPairs, connection);
     } else {
         // query
-        if (info->querys[0].qtype == 28) {
+
+        // log
+        sprintf(logBuff, "%s requested %s\n", timeStamp, info->querys[0].qname);
+        write(logFile, logBuff, strlen(logBuff));
+
+        // process
+        if (info->querys[0].qtype == AAAA) {
             FileDesc dnsConn = socket(AF_INET, SOCK_STREAM, 0);
             int c = connect(dnsConn, (struct sockaddr*)&dnsAddr, sizeof(dnsAddr));
             if (c < 0) {
@@ -65,6 +91,10 @@ void handleResult(FileDesc connection, ReadBuff *result, QueAnsPairs *qaPairs, f
             // add to qaPairs
             addQA(qaPairs, dnsConn, connection);
         } else {
+            // log
+            sprintf(logBuff, "%s unimplemenetd request\n", timeStamp);
+            write(logFile, logBuff, strlen(logBuff));
+
             // cut off everything not in header
             result->length = 12;
             result->readLength = 12;
@@ -97,4 +127,10 @@ void buffWrite(ReadBuff *buff, FileDesc connection) {
 
         // write the rest of the message
         write(connection, buff->bytes, buff->length * sizeof(uint8_t));
+}
+
+void getTimeStamp(char *buff) {
+    time_t t = time(NULL);
+    struct tm *tInfo = gmtime(&t);
+    strftime(buff, TIME_LEN, "%FT%T%z", tInfo);
 }
