@@ -116,7 +116,7 @@ Info *newInfo(ReadBuff *data) {
 
 void destroyInfo(Info *this) {
     int i;
-    for (i = 0; i < this->qdcount; i++) {
+    for (i = 0; i < this->ancount; i++) {
         free(this->answers[i].rdata);
     }
     free(this->answers);

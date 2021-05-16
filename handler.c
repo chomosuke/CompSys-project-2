@@ -2,13 +2,7 @@
 #include "parser.h"
 #include "cache.h"
 
-#define TIME_LEN 25
-
-// 2 domain name + a time stamp and " relpacing  by "
-#define MAX_LOG_LEN (TIME_LEN + DOMAIN_MAX_LEN * 2 + 15)
-
 void buffWrite(ReadBuff *buff, FileDesc connection);
-void getTimeStamp(char *buff);
 
 // return the read data if finished reading, otherwise return NULL
 ReadBuff *handleRead(FileDesc connection, ReadBuffs *readBuffs) {
@@ -83,6 +77,13 @@ void handleResult(ReadBuff *result, QueAnsPairs *qaPairs, fd_set *connectionSet,
         CacheEntry *entry = findEntry(cache, info->querys[0]);
         if (entry != NULL) {
             // respond with cache
+
+            // log 
+            char expire[TIME_LEN];
+            struct tm *tInfo = gmtime(&entry->expiry);
+            strftime(expire, TIME_LEN, "%FT%T%z", tInfo);
+            sprintf(logBuff, "%s %s expires at %s\n", timeStamp, entry->query.qname, expire);
+            write(logFile, logBuff, strlen(logBuff));
 
             if (entry->answer.qtype == AAAA) {
                 // log

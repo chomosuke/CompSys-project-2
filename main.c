@@ -1,6 +1,7 @@
 #include "head.h"
 #include "handler.h"
 #include "dataStructure.h"
+#include "cache.h"
 
 #define PORT_NUMBER 8053
 #define QUEUE_NUM 100
@@ -43,6 +44,8 @@ int main(int argc, char* argv[]) {
     ReadBuffs *readBuffs = newReadBuffs();
     QueAnsPairs *qaPairs = newQAPairs();
 
+    Cache *cache = newCache();
+
     // open log file
     FileDesc logFile = open("./dns_svr.log", O_WRONLY|O_CREAT|O_TRUNC);
 
@@ -61,7 +64,7 @@ int main(int argc, char* argv[]) {
                     // this is a old connection
                     ReadBuff *result = handleRead(i, readBuffs);
                     if (result) {
-                        handleResult(result, qaPairs, &connectionSet, dnsAddr, logFile);
+                        handleResult(result, qaPairs, &connectionSet, dnsAddr, cache, logFile);
                     }
                 }
             }

@@ -1,4 +1,5 @@
 #include "cache.h"
+#include "handler.h"
 
 Cache *newCache() {
     
@@ -31,5 +32,57 @@ void addEntry(Cache *this, Info *info, FileDesc logFile) {
         }
     }
 
-    
+    if (entry->response != NULL) {
+        // log
+        char timeStamp[TIME_LEN];
+        getTimeStamp(timeStamp);
+        char logBuff[MAX_LOG_LEN];
+        sprintf(logBuff, "%s replacing %s by %s\n", timeStamp, entry->query.qname, info->querys[0].qname);
+
+        // free previous
+        free(entry->response);
+        free(entry->answer.rdata);
+
+    }
+
+    // entry is the entry to be overwritten
+    entry->query = info->querys[0];
+    entry->answer = info->answers[0];
+    entry->answer.rdata = malloc(entry->answer.rdlength * sizeof(uint8_t));
+    assert (entry->answer.rdata != NULL);
+    memcpy(entry->answer.rdata, info->answers[0].rdata, entry->answer.rdlength * sizeof(uint8_t));
+    entry->ittl = info->ittl;
+    entry->responseLen = info->originalLen;
+    entry->response = malloc(entry->responseLen * sizeof(uint8_t));
+    assert (entry->response != NULL);
+    memcpy(entry->response, info->original, entry->responseLen * sizeof(uint8_t));
+
+    // calculate expiry
+    entry->expiry = time(NULL) + entry->answer.ttl;
+}
+
+CacheEntry *findEntry(Cache *this, Query query) {
+    int i;
+    for (i = 0; i < CACHE_LEN; i++) {
+        Query *thisQ = &this->entries[i].query;
+        if (
+            query.qclass == thisQ->qclass &&
+            strcmp(query.qname, thisQ->qname) == 0 &&
+            query.qtype == thisQ->qtype
+        ) {
+            return &this->entries[i];
+        }
+    }
+    return NULL;
+}
+
+void destroyCache(Cache *this) {
+    int i;
+    for (i = 0; i < CACHE_LEN; i++) {
+        if (this->entries[i].response != NULL) {
+            free(this->entries[i].response);
+            free(this->entries[i].answer.rdata);
+        }
+    }
+    free(this);
 }
