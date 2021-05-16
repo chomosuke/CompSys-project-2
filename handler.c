@@ -75,7 +75,7 @@ void handleResult(ReadBuff *result, QueAnsPairs *qaPairs, fd_set *connectionSet,
         write(logFile, logBuff, strlen(logBuff));
 
         CacheEntry *entry = findEntry(cache, info->querys[0]);
-        if (entry != NULL) {
+        if (entry != NULL && entry->expiry > time(NULL)) {
             // respond with cache
 
             // log 
