@@ -1,4 +1,5 @@
 dns_svr
 dns_svr.log
+*.o
 
 .vscode/
