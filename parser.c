@@ -107,6 +107,7 @@ Info *newInfo(ReadBuff *data) {
         pBytes += this->answers[iAnswers].rdlength;
     }
 
+    // store original in Info for caching purposes
     this->originalLen = data->length; // id takes 2 bytes
     this->original = malloc(this->originalLen * sizeof(uint8_t));
     memcpy(this->original, data->bytes, this->originalLen*sizeof(uint8_t));

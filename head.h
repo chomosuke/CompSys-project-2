@@ -25,7 +25,7 @@
 typedef int FileDesc;
 typedef int bool;
 
-/** 
+/**
  * About ownership for every struct:
  * 
  * Each struct should own what pointer in it points to and free them in deconstructor.
