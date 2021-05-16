@@ -1,5 +1,5 @@
-#ifndef CACHE
-#define CACHE
+#ifndef CACHEH
+#define CACHEH
 
 #include "head.h"
 #include "parser.h"

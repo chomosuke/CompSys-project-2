@@ -15,7 +15,7 @@
 
 #define AAAA 28
 
-// #define CACHE
+#define CACHE
 #define NONBLOCKING
 
 #define TRUE 1 == 1

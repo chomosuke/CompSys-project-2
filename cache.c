@@ -24,11 +24,15 @@ void addEntry(Cache *this, Info *info, FileDesc logFile) {
     }
 
     // find the entry with the smallest expiry.
-    CacheEntry *entry = &this->entries[0];
-    int i;
-    for (i = 1; i < CACHE_LEN; i++) {
-        if (this->entries[i].expiry < entry->expiry) {
-            entry = &this->entries[i];
+    CacheEntry *entry = findEntry(this, info->querys[0]); // if this query already exist and is being replaced
+    if (entry == NULL) {
+        // evict an entry
+        entry = &this->entries[0];
+        int i;
+        for (i = 1; i < CACHE_LEN; i++) {
+            if (this->entries[i].expiry < entry->expiry) {
+                entry = &this->entries[i];
+            }
         }
     }
 
