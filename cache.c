@@ -25,9 +25,9 @@ void addEntry(Cache *this, Info *info, FileDesc logFile) {
 
     // find the entry with the smallest expiry.
     CacheEntry *entry = findEntry(this, info->querys[0]); // if this query already exist and is being replaced
-    time_t currentTime = time(NULL);
     if (entry == NULL) {
         // find a expired entry
+        time_t currentTime = time(NULL);
         int i;
         for (i = 0; i < CACHE_LEN; i++) {
             if (this->entries[i].response != NULL && this->entries[i].expiry <= currentTime) {
@@ -53,6 +53,7 @@ void addEntry(Cache *this, Info *info, FileDesc logFile) {
         getTimeStamp(timeStamp);
         char logBuff[MAX_LOG_LEN];
         sprintf(logBuff, "%s replacing %s by %s\n", timeStamp, entry->query.qname, info->querys[0].qname);
+        write(logFile, logBuff, strlen(logBuff));
 
         // free previous
         free(entry->response);
