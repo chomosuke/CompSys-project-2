@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
                     // this is a old connection
                     ReadBuff *result = handleRead(i, readBuffs);
                     if (result) {
-                        handleResult(i, result, qaPairs, &connectionSet, dnsAddr, logFile);
+                        handleResult(result, qaPairs, &connectionSet, dnsAddr, logFile);
                     }
                 }
             }

@@ -25,4 +25,13 @@
 typedef int FileDesc;
 typedef int bool;
 
+/** 
+ * About ownership for every struct:
+ * 
+ * Each struct should own what pointer in it points to and free them in deconstructor.
+ * 
+ * If need to copying a struct that's referenced in one struct to another struct, do a
+ * deep copy.
+ */
+
 #endif

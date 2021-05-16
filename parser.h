@@ -16,7 +16,7 @@ typedef struct {
 } Query;
 
 typedef struct {
-    char iqname; // index of the question with the url
+    int iqname; // index of the question with the url
     uint16_t qtype;
     uint16_t qclass;
     uint32_t ttl;
@@ -40,9 +40,14 @@ typedef struct {
     uint16_t arcount;
     Query *querys;
     Answer *answers;
+
+    // data that could be cached
+    // if it is to be cached, must be cached immediately to ensure expiry being correct
+    int originalLen;
+    int ittl; // offset of first ttl in original
+    uint8_t *original;
 } Info;
 Info *newInfo(ReadBuff *data);
 void destroyInfo(Info *this);
-
 
 #endif

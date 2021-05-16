@@ -58,7 +58,9 @@ Info *newInfo(ReadBuff *data) {
         pBytes += 2; // you know that 2 bytes are read
     }
 
-    // questions
+    this->ittl = -1;
+
+    // answers
     this->answers = malloc(this->ancount * sizeof(Answer));
     assert(this->answers != NULL);
     int iAnswers;
@@ -82,13 +84,19 @@ Info *newInfo(ReadBuff *data) {
         
         memcpy(&this->answers[iAnswers].qtype, pBytes, sizeof(this->answers[iAnswers].qtype));
         this->answers[iAnswers].qtype = ntohs(this->answers[iAnswers].qtype);
-        pBytes += 2; // you know that 2 bytes are read
+        pBytes += 2; // 2 bytes are read
+
         memcpy(&this->answers[iAnswers].qclass, pBytes, sizeof(this->answers[iAnswers].qclass));
         this->answers[iAnswers].qclass = ntohs(this->answers[iAnswers].qclass);
-        pBytes += 2; // you know that 2 bytes are read
+        pBytes += 2; // 2 bytes are read
+
         memcpy(&this->answers[iAnswers].ttl, pBytes, sizeof(this->answers[iAnswers].ttl));
         this->answers[iAnswers].ttl = ntohl(this->answers[iAnswers].ttl);
+        if (this->ittl == -1) { // set index to first ttl
+            this->ittl = pBytes - data->bytes;
+        }
         pBytes += 4; // 4 bytes are read
+
         memcpy(&this->answers[iAnswers].rdlength, pBytes, sizeof(this->answers[iAnswers].rdlength));
         this->answers[iAnswers].rdlength = ntohs(this->answers[iAnswers].rdlength);
         pBytes += 2; // 2 bytes are read
@@ -98,6 +106,10 @@ Info *newInfo(ReadBuff *data) {
         memcpy(this->answers[iAnswers].rdata, pBytes, this->answers[iAnswers].rdlength * sizeof(uint8_t));
         pBytes += this->answers[iAnswers].rdlength;
     }
+
+    this->originalLen = data->length; // id takes 2 bytes
+    this->original = malloc(this->originalLen * sizeof(uint8_t));
+    memcpy(this->original, data->bytes, this->originalLen*sizeof(uint8_t));
 
     return this;
 }
@@ -109,5 +121,6 @@ void destroyInfo(Info *this) {
     }
     free(this->answers);
     free(this->querys);
+    free(this->original);
     free(this);
 }
